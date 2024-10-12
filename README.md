@@ -71,3 +71,46 @@ timezone.convert("EST", "BST", hour(0)) -- Converts the given time in timezone A
 ```
 
 Months and years are currently not supported.
+
+# Example usage
+
+The following schedules an event at 6PM UTC. It converts it to your timezone and has a countdown:
+
+```lua
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local c = require(ReplicatedStorage.c)
+
+local timezone = c.timezone
+local peek = c.peek
+
+local hour = c.hour
+
+local EVENT_TIME = hour(18) -- 6PM UTC
+
+while task.wait(1) do
+	local convertedTime = timezone.convert("UTC", timezone.here(), EVENT_TIME)
+	local now = os.date("*t")
+	
+	local eventHoursLeft = peek.hour(convertedTime) - now.hour
+	local eventMinutesLeft = peek.minute(convertedTime) - now.min
+	local eventSecondsLeft = peek.second(convertedTime) - now.sec
+
+	if eventSecondsLeft < 0 then
+		eventSecondsLeft = eventSecondsLeft + 60
+		eventMinutesLeft = eventMinutesLeft - 1
+	end
+	
+	if eventMinutesLeft < 0 then
+		eventMinutesLeft = eventMinutesLeft + 60
+		eventHoursLeft = eventHoursLeft - 1
+	end
+
+	if eventHoursLeft < 0 then
+		print("The event has ended.")
+		break
+	else
+		print(`{eventHoursLeft} Hours; {eventMinutesLeft} Minutes; and {eventSecondsLeft} Seconds;`)
+	end
+end
+```
